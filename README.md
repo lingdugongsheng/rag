@@ -1,12 +1,10 @@
-抱歉，上一轮我用 ` ```markdown ` 包裹整个 README，但 README 内部本身有 ` ```bash ` 代码块，嵌套导致渲染错乱，复制时也会带上外层标记。下面直接给纯文本内容，**全选复制覆盖 `README.md` 即可**，不带任何外层代码块。
-
 ---
 
 <div align="center">
   <h1>🧠 Advanced RAG System</h1>
   <p>
     <strong>可运行、可观测、可被追问的 Agentic RAG 系统骨架</strong><br>
-    自主规划 · 知识图谱 · 三路混合检索 · 流式输出 · 引用溯源 · 离线评估
+    自主规划 · 知识图谱 · 三路混合检索 · 流式输出 · 引用溯源
   </p>
   <p>
     <img src="https://img.shields.io/badge/Python-3.11+-blue?logo=python" alt="Python">
@@ -296,44 +294,6 @@ L2 距离下 `score = 1 - distance` 可能为负，语义不成立。cosine 距�
 
 ---
 
-## 评估
-
-`eval/` 目录提供离线评估脚本，用于量化每个组件的实际收益。
-
-### 准备
-
-1. 上传 `eval/qa.jsonl` 中 `relevant_sources` 提到的文档。
-2. 把 `relevant_sources` 改成真实文件名。
-
-### 运行
-
-```bash
-# 基线
-python -m eval.run_eval
-
-# 关图谱检索
-python -m eval.run_eval --disable-graph
-
-# 关查询改写
-python -m eval.run_eval --disable-rewrite
-
-# 关重排序
-python -m eval.run_eval --disable-rerank
-```
-
-### 指标
-
-| 指标 | 含义 | 越高越好 |
-|---|---|---|
-| `hit_rate` | 前 k 个检索结果中命中相关来源的比例 | 是 |
-| `avg_keyword_cov` | 参考答案关键词在生成答案中的覆盖率 | 是 |
-| `avg_citation_acc` | 引用来源属于相关文档的比例 | 是 |
-| `p50_ms` / `p95_ms` | 单次请求延迟 | 否 |
-
-结果写入 `eval/report.json`，同时打印汇总。这些数字是判断「某个组件到底值不值得留」的依据，不是拍脑袋决定的。
-
----
-
 ## 已知限制
 
 这份清单是刻意保留的，用来明确系统边界，也是后续迭代的优先级参考。每一条都给出改进方向。
@@ -352,7 +312,7 @@ python -m eval.run_eval --disable-rerank
 
 ### 评估层
 
-- **没有 RAGAS / LLM-as-judge 类评估**：目前以命中率、关键词覆盖、引用准确率为主，答案忠实度（faithfulness）尚无自动评估。改进：接入 RAGAS，或自建 LLM-as-judge 流程。
+- **没有自动评估体系**：目前以人工体验为主，缺少 RAGAS 或 LLM-as-judge 等量化答案忠实度的机制。改进方向：构建小型的 QA 数据集，接入 RAGAS 评估。
 
 ### 前端层
 
@@ -406,10 +366,6 @@ rag/
 │       ├── store.js        # 会话状态 + localStorage
 │       ├── renderer.js     # DOM 渲染 + 引用卡片
 │       └── utils.js        # Markdown / Toast / 主题
-├── eval/                   # 离线评估
-│   ├── qa.jsonl
-│   ├── run_eval.py
-│   └── README.md
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
@@ -425,9 +381,8 @@ rag/
 
 1. **`task_store` 抽象成接口**：内存实现 + Redis 实现，解决多 worker 状态不共享。
 2. **BM25 增量索引**：持久化 tokenized corpus，`add_documents` 只 append 新文档。
-3. **接入 RAGAS**：补上答案忠实度评估，让「生成质量」也可量化。
-4. **文档版本表**：支持增量更新与全局去重。
-5. **API Key + 限流**：最小可用的鉴权方案。
+3. **文档版本表**：支持增量更新与全局去重。
+4. **API Key + 限流**：最小可用的鉴权方案。
 
 ---
 
