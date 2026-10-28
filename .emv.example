@@ -1,0 +1,20 @@
+# ==================== 硅基流动（Embedding） ====================
+LLM_API_KEY=your_api_key_here
+LLM_BASE_URL=https://api.siliconflow.cn/v1
+EMBEDDING_MODEL=BAAI/bge-m3
+
+# ==================== 智谱 AI（生成 + 规划 + 反思 + 改写） ====================
+ZHIPU_API_KEY=your_zhipu_api_key_here
+ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+ZHIPU_MODEL=glm-4-flash
+
+# ==================== LangSmith 追踪（可选） ====================
+# 只有 LANGSMITH_TRACING=true 且 LANGSMITH_API_KEY 非空时才会启用
+LANGSMITH_TRACING=false
+LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+# LANGSMITH_API_KEY=
+LANGSMITH_PROJECT=rag-system
+
+# ==================== 运行环境 ====================
+ENVIRONMENT=dev
+LOG_LEVEL=INFO

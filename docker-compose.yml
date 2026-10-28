@@ -1,0 +1,21 @@
+services:
+  rag:
+    build: .
+    image: rag-system:0.4.0
+    container_name: rag-system
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./static:/app/static:ro
+    restart: unless-stopped
+    # 健康检查用 /livez：只看进程存活，不依赖外部 API。
+    # /health 会检查外部 API，外部抖动不应触发容器重启。
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/livez"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

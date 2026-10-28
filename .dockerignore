@@ -1,0 +1,33 @@
+# 密钥
+.env
+.env.*
+*.key
+*.pem
+
+# 本地数据
+chroma_db/
+uploads/
+documents/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+ai/
+
+# 测试与评估产物
+eval/report.json
+.pytest_cache/
+
+# IDE / 系统
+.vscode/
+.idea/
+.DS_Store
+.git/
+.gitignore
+
+# 文档
+*.md
+!README.md

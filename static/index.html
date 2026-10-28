@@ -1,0 +1,128 @@
+<!-- ==================== 文件说明 ==================== -->
+<!-- 这是前端页面的 HTML 结构 -->
+<!-- 页面布局：左侧侧边栏（对话历史）+ 右侧主面板（聊天区域） -->
+<!-- 技术栈：原生 HTML + CSS + JavaScript（无框架） -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <!-- 设置字符编码为 UTF-8，支持中文 -->
+  <meta charset="UTF-8">
+  <!-- 响应式视图设置：宽度自适应设备，初始缩放为1.0，支持刘海屏 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- 页面描述，用于 SEO -->
+  <meta name="description" content="基于RAG的智能知识库问答系统">
+  <!-- 页面标题 -->
+  <title>RAG 智能问答</title>
+  <!-- 网页图标（使用 emoji 🧠） -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🧠</text></svg>">
+  <!-- 引入自定义样式文件 -->
+  <link rel="stylesheet" href="/static/styles.css">
+  <!-- 引入代码高亮主题（默认为深色主题） -->
+  <link rel="stylesheet" id="hljs-theme" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- 引入代码高亮库（defer 表示页面加载完成后再执行） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+  <!-- 引入 Markdown 解析库 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+  <!-- 引入 HTML 净化库（防止 XSS 攻击） -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" defer></script>
+  <!-- 引入主 JavaScript 文件（module 模式） -->
+  <script type="module" src="/static/js/main.js" defer></script>
+</head>
+<body>
+  <!-- 侧边栏遮罩层（移动端使用，点击关闭侧边栏） -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- 侧边栏：包含对话历史和操作按钮 -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="对话历史">
+    <!-- 侧边栏头部：标题和折叠按钮 -->
+    <div class="sidebar-header">
+      <span>🧠 RAG System</span>  <!-- 系统标题 -->
+      <!-- 折叠/展开侧边栏按钮 -->
+      <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="折叠侧边栏" title="折叠侧边栏">◀</button>
+    </div>
+    
+    <!-- 新对话按钮 -->
+    <button class="new-chat-btn" id="new-chat-btn" aria-label="开启新对话">
+      <span aria-hidden="true">＋</span> <span class="btn-text">新对话</span>
+    </button>
+    
+    <!-- 对话历史列表 -->
+    <div class="history-list" id="history-list" role="list" aria-label="历史对话列表"></div>
+    
+    <!-- 侧边栏底部：导出、导入、主题切换按钮 -->
+    <div class="sidebar-footer">
+      <div class="footer-actions">
+        <button class="footer-btn" id="export-btn" aria-label="导出对话" title="导出全部对话">📤</button>
+        <button class="footer-btn" id="import-btn" aria-label="导入对话" title="导入对话备份">📥</button>
+        <button class="footer-btn" id="theme-toggle-btn" aria-label="切换主题" title="切换浅色/深色/自动">🌓</button>
+      </div>
+      <!-- 隐藏的文件导入输入框 -->
+      <input type="file" id="import-file-input" accept=".json" hidden>
+    </div>
+  </aside>
+
+  <!-- 主面板：聊天区域 -->
+  <main class="main-panel" id="main-panel">
+    <!-- 聊天头部：菜单按钮和对话标题 -->
+    <header class="chat-header">
+      <button class="menu-toggle" id="menu-toggle" aria-label="切换侧边栏" aria-expanded="false">☰</button>
+      <span id="chat-header-title">新对话</span>
+    </header>
+    
+    <!-- 消息容器：显示所有消息 -->
+    <div class="messages-container" id="messages" role="log" aria-live="polite" aria-label="对话内容">
+      <!-- 空状态：没有消息时显示 -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">📚</div>
+        <h3>欢迎使用 RAG 智能问答</h3>
+        <p>上传文档后即可开始提问</p>
+      </div>
+    </div>
+    
+    <!-- 回到底部按钮 -->
+    <button class="scroll-bottom-btn" id="scroll-bottom-btn" aria-label="回到底部" title="回到底部">↓</button>
+    
+    <!-- 输入区域：上传文件 + 输入框 + 发送按钮 -->
+    <footer class="input-area">
+      <!-- 上传区域 -->
+      <div class="upload-area" id="upload-area">
+        <label class="file-label" for="file-input" title="上传文档" aria-label="上传文档">
+          <span class="file-label-icon">📎</span>
+          <span class="file-label-text">上传文档</span>
+        </label>
+        <!-- 上传进度条 -->
+        <div class="upload-progress" id="upload-progress-bar" style="display:none;"></div>
+        <!-- 上传状态文本 -->
+        <span class="upload-status-text" id="upload-status-text" aria-live="polite"></span>
+      </div>
+      <!-- 隐藏的文件选择输入框 -->
+      <input type="file" id="file-input" accept=".pdf,.txt,.md,.docx" hidden>
+      
+      <!-- 输入框包装器 -->
+      <div class="input-wrapper">
+        <textarea id="user-input" rows="1" placeholder="输入您的问题... (Enter 发送，Shift+Enter 换行)"
+                  aria-label="输入问题"></textarea>
+      </div>
+      
+      <!-- 发送按钮 -->
+      <button class="send-btn" id="send-btn" aria-label="发送消息">
+        <!-- 发送图标 -->
+        <svg class="send-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+        <!-- 加载动画 -->
+        <span class="spinner" aria-hidden="true"></span>
+        <!-- 停止图标 -->
+        <svg class="stop-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      </button>
+    </footer>
+  </main>
+
+  <!-- 拖拽上传覆盖层（用户拖拽文件时显示） -->
+  <div id="drop-overlay" class="drop-overlay" aria-hidden="true">
+    <div class="drop-message">📂 释放文件以上传</div>
+  </div>
+
+  <!-- Toast 消息容器（用于显示提示信息） -->
+  <div id="toast-container" aria-live="polite" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;"></div>
+</body>
+</html>
